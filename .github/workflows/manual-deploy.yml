@@ -25,9 +25,9 @@ on:
           - production
 jobs:
   build-and-push-app:
+    uses: ./.github/workflows/build-and-push.yml
     name: Build & Deploy App into aws ECR
     if: ${{ inputs.appName != 'ALL' }}
-    uses: ./.github/workflows/build-and-push.yml
     with:
       appName: ${{ inputs.appName }}
 
