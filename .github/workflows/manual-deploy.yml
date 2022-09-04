@@ -1,29 +1,49 @@
+name: Manual deploy launch
+
 on:
   workflow_dispatch:
     inputs:
       appName:
-        description: 'App to deploy'
+        description: App to deploy
         required: true
         type: choice
         options:
-          - 'app1'
-          - 'app2'
-          - 'app3'
-          - 'app4'
-          - 'ALL'
+          - app1
+          - app2
+          - app3
+          - app4
+          - ALL
       namespace:
-        description: 'Dest environment'
+        description: Dest environment
         required: true
-        default: 'alpha'
+        default: alpha
         type: choice
         options:
-          - 'alpha'
-          - 'beta'
-          - 'production'
+          - alpha
+          - beta
+          - production
 jobs:
-  printInputs:
+  print-variables:
+    name: Print received variables
     runs-on: ubuntu-latest
     steps:
       - run: |
           echo "appName selected: ${{ github.event.inputs.appName }}"
           echo "namespace selected: ${{ github.event.inputs.namespace }}"
+
+  build-and-push-app:
+    name: Single app selected => Build docker image and then deploy into aws ECR
+    if: ${{ github.event.inputs.appName }} != 'ALL'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Deploy specific app'
+        run: |
+          echo "Deploy app: ${{ github.event.inputs.appName }} into namespace: ${{ github.event.inputs.namespace }}"
+
+  build-and-push-all:
+    name: ALL apps selected => Build docker images and then deploy into aws ECR
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Deploy ALL apps'
+        run: |
+          echo "Deploy ALL apps into namespace: ${{ github.event.inputs.namespace }}"
