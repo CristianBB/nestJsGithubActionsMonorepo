@@ -26,6 +26,8 @@ jobs:
       - name: Print env
         run: |
           echo "appName: ${{ inputs.appName }}"
+          echo "imageTag: ${{ inputs.imageTag }}"
+          echo "namespace: ${{ inputs.namespace }}"
 
       - name: Clone ArgoCD repo
         uses: actions/checkout@v3
@@ -40,7 +42,7 @@ jobs:
           NAMESPACE: ${{ inputs.namespace }}
         run: |
           cd $GITHUB_WORKSPACE
-          yq e -i ".deploy.image = $IMAGE_TAG" helm/$APP_NAME/values.$NAMESPACE.yaml
+          yq e -i ".deploy.image = \"$IMAGE_TAG\"" helm/$APP_NAME/values.$NAMESPACE.yaml
           git add helm/$APP_NAME/values.$NAMESPACE.yaml
           git commit -m "$APP_NAME deployment updated to $IMAGE_TAG"
           until git push; do
