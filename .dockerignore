@@ -1,0 +1,12 @@
+node_modules
+doc
+ide
+README.md
+.git
+.env
+build/
+dist/
+.eslintrc.js
+.idea
+.prettierrc
+
