@@ -32,16 +32,16 @@ jobs:
 
       - name: Print variables
         run: |
-          echo "appName selected: $github.event.inputs.appName"
-          echo "namespace selected: $github.event.inputs.namespace"
+          echo "app selected: ${{ inputs.appName }}"
+          echo "namespace selected: ${{inputs.namespace }}"
 
-      - name: Build & Push into ECR app $github.event.inputs.appName
-        if: ${{ github.event.inputs.appName != 'ALL' }}
+      - name: Specific App => Build & Push into ECR
+        if: ${{ inputs.appName != 'ALL' }}
         run: |
-          echo "Deploy app: ${{ github.event.inputs.appName }} into namespace: ${{ github.event.inputs.namespace }}"
+          echo "Deploy app: ${{ inputs.appName }} into namespace: ${{ inputs.namespace }}"
 
-      - name: 'Deploy ALL APPS'
-        if: ${{ github.event.inputs.appName == 'ALL' }}
+      - name: All Apps => Build & Push into ECR
+        if: ${{ inputs.appName == 'ALL' }}
         run: |
-          echo "Deploy ALL apps into namespace: ${{ github.event.inputs.namespace }}"
+          echo "Deploy ALL apps into namespace: ${{ inputs.namespace }}"
 
