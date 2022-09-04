@@ -31,10 +31,4 @@ jobs:
     with:
       appName: ${{ inputs.appName }}
 
-  build-and-push-all:
-    name: Build & Deploy ALL Apps into aws ECR
-    if: ${{ inputs.appName == 'ALL' }}
-    steps:
-      run: |
-        echo "Deploy ALL apps into namespace: ${{ inputs.namespace }}"
 
