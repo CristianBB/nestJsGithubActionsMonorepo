@@ -27,14 +27,19 @@ jobs:
     name: Build specified docker images and deploy into aws ECR
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Print variables
         run: |
           echo "appName selected: ${{ github.event.inputs.appName }}"
           echo "namespace selected: ${{ github.event.inputs.namespace }}"
-      - name: 'Deploy specific app'
+
+      - name: Build & Push into ECR app github.event.inputs.appName
         if: github.event.inputs.appName != 'ALL'
         run: |
           echo "Deploy app: ${{ github.event.inputs.appName }} into namespace: ${{ github.event.inputs.namespace }}"
+
       - name: 'Deploy ALL APPS'
         if: github.event.inputs.appName == 'ALL'
         run: |
