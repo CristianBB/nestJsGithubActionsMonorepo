@@ -1,4 +1,4 @@
-name: Build and Push App
+name: Deploy into Argocd
 
 on:
   workflow_call:
