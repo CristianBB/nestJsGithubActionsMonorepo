@@ -29,6 +29,7 @@ jobs:
       - name: Print env
         run: |
           echo "appName: ${{ inputs.appName }}"
+          echo "ecrRegistry: ${{ inputs.ecrRegistry }}"
           echo "imageTag: ${{ inputs.imageTag }}"
           echo "namespace: ${{ inputs.namespace }}"
 
