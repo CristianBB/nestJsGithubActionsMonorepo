@@ -35,7 +35,7 @@ jobs:
           echo "appName selected: ${{ github.event.inputs.appName }}"
           echo "namespace selected: ${{ github.event.inputs.namespace }}"
 
-      - name: Build & Push into ECR app github.event.inputs.appName
+      - name: Build & Push into ECR app $github.event.inputs.appName
         if: github.event.inputs.appName != 'ALL'
         run: |
           echo "Deploy app: ${{ github.event.inputs.appName }} into namespace: ${{ github.event.inputs.namespace }}"
