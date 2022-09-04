@@ -1,0 +1,29 @@
+on:
+  workflow_dispatch:
+    inputs:
+      appName:
+        description: 'App to deploy'
+        required: true
+        type: choice
+        options:
+          - 'app1'
+          - 'app2'
+          - 'app3'
+          - 'app4'
+          - 'ALL'
+      namespace:
+        description: 'Dest environment'
+        required: true
+        default: 'alpha'
+        type: choice
+        options:
+          - 'alpha'
+          - 'beta'
+          - 'production'
+jobs:
+  printInputs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "appName selected: ${{ github.event.inputs.appName }}"
+          echo "namespace selected: ${{ github.event.inputs.namespace }}"
