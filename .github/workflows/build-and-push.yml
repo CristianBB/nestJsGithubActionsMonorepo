@@ -47,12 +47,10 @@ jobs:
         id: build
         env:
           APP_NAME: ${{ inputs.appName }}
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ inputs.appName }}
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.appName }}/${{ github.sha }}
         run: |
-          echo "Building app: $APP_NAME with tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f apps/$APP_NAME/Dockerfile .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=imageTag::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "Building app: $APP_NAME with tag $IMAGE_TAG"
+          docker build -t $IMAGE_TAG -f apps/$APP_NAME/Dockerfile .
+          docker push $IMAGE_TAG
+          echo "::set-output name=imageTag::$IMAGE_TAG"
 
