@@ -23,28 +23,20 @@ on:
           - beta
           - production
 jobs:
-  print-variables:
-    name: Print received variables
+  build-and-push:
+    name: Build specified docker images and deploy into aws ECR
     runs-on: ubuntu-latest
     steps:
-      - run: |
+      - name: Print variables
+        run: |
           echo "appName selected: ${{ github.event.inputs.appName }}"
           echo "namespace selected: ${{ github.event.inputs.namespace }}"
-
-  build-and-push-app:
-    if: github.event.inputs.appName != 'ALL'
-    name: Single app selected => Build docker image and then deploy into aws ECR
-    runs-on: ubuntu-latest
-    steps:
       - name: 'Deploy specific app'
+        if: github.event.inputs.appName != 'ALL'
         run: |
           echo "Deploy app: ${{ github.event.inputs.appName }} into namespace: ${{ github.event.inputs.namespace }}"
-
-  build-and-push-all:
-    if: github.event.inputs.appName == 'ALL'
-    name: ALL apps selected => Build docker images and then deploy into aws ECR
-    runs-on: ubuntu-latest
-    steps:
-      - name: 'Deploy ALL apps'
+      - name: 'Deploy ALL APPS'
+        if: github.event.inputs.appName == 'ALL'
         run: |
           echo "Deploy ALL apps into namespace: ${{ github.event.inputs.namespace }}"
+
