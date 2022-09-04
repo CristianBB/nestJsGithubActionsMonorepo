@@ -32,8 +32,8 @@ jobs:
           echo "namespace selected: ${{ github.event.inputs.namespace }}"
 
   build-and-push-app:
-    name: Single app selected => Build docker image and then deploy into aws ECR
     if: ${{ github.event.inputs.appName }} != 'ALL'
+    name: Single app selected => Build docker image and then deploy into aws ECR
     runs-on: ubuntu-latest
     steps:
       - name: 'Deploy specific app'
@@ -41,6 +41,7 @@ jobs:
           echo "Deploy app: ${{ github.event.inputs.appName }} into namespace: ${{ github.event.inputs.namespace }}"
 
   build-and-push-all:
+    if: ${{ github.event.inputs.appName }} == 'ALL'
     name: ALL apps selected => Build docker images and then deploy into aws ECR
     runs-on: ubuntu-latest
     steps:
