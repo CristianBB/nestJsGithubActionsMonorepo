@@ -28,6 +28,8 @@ jobs:
   build-one:
     uses: ./.github/workflows/build-and-push.yml
     if: ${{ inputs.appName != 'ALL' }}
+    outputs:
+      imageTag: ${{ steps.build.outputs.imageTag }}
     with:
       appName: ${{ inputs.appName }}
     secrets:
