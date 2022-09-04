@@ -19,7 +19,7 @@ on:
         required: true
 
 jobs:
-  build-and-push:
+  deploy-argocd:
     name: Build & Deploy into aws ECR
     runs-on: ubuntu-latest
     steps:

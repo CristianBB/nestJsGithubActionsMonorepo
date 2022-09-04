@@ -13,11 +13,17 @@ on:
         required: true
       AWS_REGION:
         required: true
+    outputs:
+      imageTag:
+        description: Generated image tag
+        value: ${{ jobs.build-and-push.outputs.imageTag }}
 
 jobs:
   build-and-push:
     name: Build & Deploy into aws ECR
     runs-on: ubuntu-latest
+    outputs:
+      imageTag: ${{ steps.build.outputs.imageTag }}
     steps:
       - name: Print env
         run: |
