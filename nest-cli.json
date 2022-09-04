@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/nest-js-github-actions-monorepo/src",
+  "monorepo": true,
+  "root": "apps/nest-js-github-actions-monorepo",
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/nest-js-github-actions-monorepo/tsconfig.app.json"
+  },
+  "projects": {
+    "nest-js-github-actions-monorepo": {
+      "type": "application",
+      "root": "apps/nest-js-github-actions-monorepo",
+      "entryFile": "main",
+      "sourceRoot": "apps/nest-js-github-actions-monorepo/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/nest-js-github-actions-monorepo/tsconfig.app.json"
+      }
+    },
+    "app1": {
+      "type": "application",
+      "root": "apps/app1",
+      "entryFile": "main",
+      "sourceRoot": "apps/app1/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/app1/tsconfig.app.json"
+      }
+    },
+    "app2": {
+      "type": "application",
+      "root": "apps/app2",
+      "entryFile": "main",
+      "sourceRoot": "apps/app2/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/app2/tsconfig.app.json"
+      }
+    },
+    "app3": {
+      "type": "application",
+      "root": "apps/app3",
+      "entryFile": "main",
+      "sourceRoot": "apps/app3/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/app3/tsconfig.app.json"
+      }
+    },
+    "app4": {
+      "type": "application",
+      "root": "apps/app4",
+      "entryFile": "main",
+      "sourceRoot": "apps/app4/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/app4/tsconfig.app.json"
+      }
+    }
+  }
+}
