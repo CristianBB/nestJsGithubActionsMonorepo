@@ -65,4 +65,14 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
 
+  deploy-all:
+    uses: ./.github/workflows/deploy-argocd.yml
+    needs: build-all
+    with:
+      appName: ${{ inputs.appName }}
+      imageTag: ${{ needs.build-one.outputs.imageTag }}
+      namespace: ${{ inputs.namespace }}
+    secrets:
+      ARGOCD_REPO: ${{ secrets.ARGOCD_REPO }}
+      PAT_DEPLOY: ${{ secrets.PAT_DEPLOY }}
 

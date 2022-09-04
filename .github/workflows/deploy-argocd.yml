@@ -20,7 +20,7 @@ on:
 
 jobs:
   deploy-argocd:
-    name: Build & Deploy into aws ECR
+    name: Deploy ArgoCD
     runs-on: ubuntu-latest
     steps:
       - name: Print env
