@@ -1,4 +1,4 @@
-name: Manual deploy launch
+name: Manual Deploy
 
 on:
   workflow_dispatch:
@@ -58,7 +58,7 @@ jobs:
         run: |
           echo "Building app: $APP_NAME with tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f apps/$APP_NAME/Dockerfile .
-          docker push $ECR_REGISTRY/ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: All Apps => Build & Push into ECR
         if: ${{ inputs.appName == 'ALL' }}
