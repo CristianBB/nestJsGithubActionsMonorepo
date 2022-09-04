@@ -24,37 +24,20 @@ on:
           - beta
           - production
 jobs:
-  build-and-push:
-    name: Build & Deploy into aws ECR
+  build-and-push-app:
+    name: Build & Deploy App into aws ECR
+    if: ${{ inputs.appName != 'ALL' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Print variables
-        run: |
-          echo "app selected: ${{ inputs.appName }}"
-          echo "namespace selected: ${{inputs.namespace }}"
-
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
       - name: Specific App => Build & Push into ECR
-        if: ${{ inputs.appName != 'ALL' }}
         uses: CristianBB/nestJsGithubActionsMonorepo/.github/workflows/build-and-push.yml@main
         with:
           appName: ${{ inputs.appName }}
 
-      - name: All Apps => Build & Push into ECR
-        if: ${{ inputs.appName == 'ALL' }}
-        run: |
-          echo "Deploy ALL apps into namespace: ${{ inputs.namespace }}"
+  build-and-push-all:
+    name: Build & Deploy ALL Apps into aws ECR
+    if: ${{ inputs.appName == 'ALL' }}
+    steps:
+      run: |
+        echo "Deploy ALL apps into namespace: ${{ inputs.namespace }}"
 
