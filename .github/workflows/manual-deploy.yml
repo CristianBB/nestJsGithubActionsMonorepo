@@ -28,11 +28,9 @@ jobs:
     name: Build & Deploy App into aws ECR
     if: ${{ inputs.appName != 'ALL' }}
     runs-on: ubuntu-latest
-    steps:
-      - name: Specific App => Build & Push into ECR
-        uses: CristianBB/nestJsGithubActionsMonorepo/.github/workflows/build-and-push.yml@main
-        with:
-          appName: ${{ inputs.appName }}
+    uses: CristianBB/nestJsGithubActionsMonorepo/.github/workflows/build-and-push.yml@main
+    with:
+      appName: ${{ inputs.appName }}
 
   build-and-push-all:
     name: Build & Deploy ALL Apps into aws ECR
