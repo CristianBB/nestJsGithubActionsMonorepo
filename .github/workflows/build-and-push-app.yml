@@ -1,4 +1,4 @@
-name: Build and Push app into AWS ECR
+name: Build and Push App
 
 on:
   workflow_call:
