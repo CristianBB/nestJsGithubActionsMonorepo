@@ -12,6 +12,7 @@ on:
           - app2
           - app3
           - app4
+          - nest-js-github-actions-monorepo
           - ALL
       namespace:
         description: Dest environment
@@ -27,18 +28,36 @@ jobs:
     name: Build specified docker images and deploy into aws ECR
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
 
       - name: Print variables
         run: |
           echo "app selected: ${{ inputs.appName }}"
           echo "namespace selected: ${{inputs.namespace }}"
 
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
       - name: Specific App => Build & Push into ECR
         if: ${{ inputs.appName != 'ALL' }}
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.appName }}
+          IMAGE_TAG: ${{ GITHUB_SHA }}
         run: |
-          echo "Deploy app: ${{ inputs.appName }} into namespace: ${{ inputs.namespace }}"
+          echo "Building app: ${{ inputs.appName }} with tag ${{ $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG }}"
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f apps/${{ inputs.appName }}/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: All Apps => Build & Push into ECR
         if: ${{ inputs.appName == 'ALL' }}
