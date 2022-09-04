@@ -41,6 +41,9 @@ jobs:
           IMAGE_TAG: ${{ inputs.imageTag }}
           NAMESPACE: ${{ inputs.namespace }}
         run: |
+          git config --global user.email "deploy-argocd@github-action.com"
+          git config --global user.name "Deploy Argocd"
+          
           cd $GITHUB_WORKSPACE
           yq e -i ".deploy.image = \"$IMAGE_TAG\"" helm/$APP_NAME/values.$NAMESPACE.yaml
           git add helm/$APP_NAME/values.$NAMESPACE.yaml
