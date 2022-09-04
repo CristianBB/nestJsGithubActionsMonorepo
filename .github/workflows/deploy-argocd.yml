@@ -6,6 +6,9 @@ on:
       appName:
         required: true
         type: string
+      ecrRegistry:
+        required: true
+        type: string
       imageTag:
         required: true
         type: string
@@ -38,6 +41,8 @@ jobs:
       - name: Change image into ArgoCD repo
         env:
           APP_NAME: ${{ inputs.appName }}
+          ECR_REPOSITORY: ${{ inputs.appName }}
+          ECR_REGISTRY: ${{ inputs.ecrRegistry }}
           IMAGE_TAG: ${{ inputs.imageTag }}
           NAMESPACE: ${{ inputs.namespace }}
         run: |
@@ -45,10 +50,9 @@ jobs:
           git config --global user.name "Deploy Argocd"
           
           cd $GITHUB_WORKSPACE
-          yq e -i ".deploy.image = \"$IMAGE_TAG\"" helm/$APP_NAME/values.$NAMESPACE.yaml
+          yq e -i ".deploy.image = \"$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG\"" helm/$APP_NAME/values.$NAMESPACE.yaml
           git add helm/$APP_NAME/values.$NAMESPACE.yaml
           git commit -m "$APP_NAME deployment updated to $IMAGE_TAG"
           until git push; do
             git pull --rebase origin main
           done
-          

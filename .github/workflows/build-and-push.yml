@@ -14,6 +14,9 @@ on:
       AWS_REGION:
         required: true
     outputs:
+      ecrRegistry:
+        description: ECR Registry address
+        value: ${{ jobs.build-and-push.outputs.ecrRegistry }}
       imageTag:
         description: Generated image tag
         value: ${{ jobs.build-and-push.outputs.imageTag }}
@@ -23,6 +26,7 @@ jobs:
     name: Build & Deploy
     runs-on: ubuntu-latest
     outputs:
+      ecrRegistry: ${{ steps.login-ecr.outputs.registry }}
       imageTag: ${{ steps.build.outputs.imageTag }}
     steps:
       - name: Print env
@@ -47,10 +51,12 @@ jobs:
         id: build
         env:
           APP_NAME: ${{ inputs.appName }}
-          IMAGE_TAG: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.appName }}/${{ github.sha }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.appName }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          echo "Building app: $APP_NAME with tag $IMAGE_TAG"
-          docker build -t $IMAGE_TAG -f apps/$APP_NAME/Dockerfile .
-          docker push $IMAGE_TAG
+          echo "Building app: $APP_NAME with tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f apps/$APP_NAME/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=imageTag::$IMAGE_TAG"
 

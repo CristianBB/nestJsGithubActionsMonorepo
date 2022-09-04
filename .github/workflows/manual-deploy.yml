@@ -40,6 +40,7 @@ jobs:
     needs: build-one
     with:
       appName: ${{ inputs.appName }}
+      ecrRegistry: ${{ needs.build-one.outputs.ecrRegistry }}
       imageTag: ${{ needs.build-one.outputs.imageTag }}
       namespace: ${{ inputs.namespace }}
     secrets:
