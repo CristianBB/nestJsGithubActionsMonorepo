@@ -25,7 +25,7 @@ on:
           - beta
           - production
 jobs:
-  build-and-push-app:
+  build-one:
     uses: ./.github/workflows/build-and-push.yml
     if: ${{ inputs.appName != 'ALL' }}
     with:
@@ -35,7 +35,18 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
 
-  build-and-push-all:
+  deploy-one:
+    uses: ./.github/workflows/deploy-argocd.yml
+    needs: build-one
+    with:
+      appName: ${{ inputs.appName }}
+      imageTag: ${{ needs.build-one.outputs.imageTag }}
+      namespace: ${{ inputs.namespace }}
+    secrets:
+      ARGOCD_REPO: ${{ secrets.ARGOCD_REPO }}
+      PAT_DEPLOY: ${{ secrets.PAT_DEPLOY }}
+
+  build-all:
     uses: ./.github/workflows/build-and-push.yml
     if: ${{ inputs.appName == 'ALL' }}
     strategy:

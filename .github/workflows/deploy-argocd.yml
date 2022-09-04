@@ -1,0 +1,49 @@
+name: Build and Push App
+
+on:
+  workflow_call:
+    inputs:
+      appName:
+        required: true
+        type: string
+      imageTag:
+        required: true
+        type: string
+      namespace:
+        required: true
+        type: string
+    secrets:
+      ARGOCD_REPO:
+        required: true
+      PAT_DEPLOY:
+        required: true
+
+jobs:
+  build-and-push:
+    name: Build & Deploy into aws ECR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print env
+        run: |
+          echo "appName: ${{ inputs.appName }}"
+
+      - name: Clone ArgoCD repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.ARGOCD_REPO }}
+          token: ${{ secrets.PAT_DEPLOY }}
+
+      - name: Change image into ArgoCD repo
+        env:
+          APP_NAME: ${{ inputs.appName }}
+          IMAGE_TAG: ${{ inputs.imageTag }}
+          NAMESPACE: ${{ inputs.namespace }}
+        run: |
+          cd $GITHUB_WORKSPACE
+          yq e -i ".deploy.image = $IMAGE_TAG" helm/$APP_NAME/values.$NAMESPACE.yaml
+          git add helm/$APP_NAME/values.$NAMESPACE.yaml
+          git commit -m "$APP_NAME deployment updated to $IMAGE_TAG"
+          until git push; do
+            git pull --rebase origin main
+          done
+          
