@@ -28,7 +28,6 @@ jobs:
     name: Build & Deploy into aws ECR
     runs-on: ubuntu-latest
     steps:
-
       - name: Print variables
         run: |
           echo "app selected: ${{ inputs.appName }}"
