@@ -49,7 +49,7 @@ jobs:
       - name: Get changed apps
         id: changed-apps
         uses: tj-actions/changed-files@v29.0.3
-        if: steps.changed-global.outputs.any_changed == false
+        if: steps.changed-global.outputs.any_changed == 'false'
         with:
           files: |
             apps/**
