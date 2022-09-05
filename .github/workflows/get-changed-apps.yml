@@ -63,6 +63,6 @@ jobs:
           appsChangedJson=$(for path in ${{ steps.changed-files.outputs.all_changed_files }}; do
             app=$(echo "$path" | sed -e 's/apps\///g' | sed -e 's/\/.*//g')
             echo "$app"
-          done | jq -R -s 'split("\n") -[""]' | jq -c '{appName: [.|unique]}')
+          done | jq -R -s 'split("\n") -[""]' | jq -c '{appName: .|unique}')
           echo "appsChangedJson: $appsChangedJson"
           echo "::set-output name=appsChangedJson::$appsChangedJson"
