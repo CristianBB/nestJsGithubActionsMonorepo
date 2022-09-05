@@ -44,7 +44,7 @@ jobs:
   # ALL APPS => Build apps with returned json from get-all-apps job
   build-all:
     uses: ./.github/workflows/build-and-push.yml
-    needs: [get-changed-apps, get-all-apps]
+    needs: get-all-apps
     strategy:
       matrix: ${{ fromJson(needs.get-all-apps.outputs.outputJson) }}
     with:
@@ -59,7 +59,7 @@ jobs:
   #       But as imageTag is based on SHA it's not a problem to generate all deploys
   deploy-all:
     uses: ./.github/workflows/deploy-argocd.yml
-    needs: [set-env, get-changed-apps, get-all-apps, build-all]
+    needs: [set-env, get-all-apps, build-all]
     strategy:
       matrix: ${{ fromJson(needs.get-all-apps.outputs.outputJson) }}
     with:

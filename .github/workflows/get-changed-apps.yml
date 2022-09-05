@@ -58,7 +58,7 @@ jobs:
       # Generate output JSON for appsChangedJson
       - name: Generate output JSON for appsChangedJson
         id: changed-apps-value
-        if: steps.changed-global.outputs.any_changed == false
+        if: steps.changed-global.outputs.any_changed == 'false'
         run: |
           appsChangedJson=$(for path in ${{ steps.changed-files.outputs.all_changed_files }}; do
             app=$(echo "$path" | sed -e 's/apps\///g' | sed -e 's/\/.*//g')
