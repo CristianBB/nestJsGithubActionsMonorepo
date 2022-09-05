@@ -15,7 +15,7 @@ jobs:
     outputs:
       namespace: ${{ steps.set-namespace.outputs.namespace }}
     env:
-      BRANCH: ${{env.GITHUB_REF_NAME}}
+      BRANCH: ${{github.ref_name}}
     steps:
       - name: Set namespace
         id: set-namespace
