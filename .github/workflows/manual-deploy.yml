@@ -2,6 +2,9 @@ name: Manual Deploy
 
 on:
   workflow_dispatch:
+    env:
+      AWS_REGION: eu-west-1
+
     inputs:
       appName:
         description: App to deploy
@@ -30,10 +33,10 @@ jobs:
     if: ${{ inputs.appName != 'ALL' }}
     with:
       appName: ${{ inputs.appName }}
+      awsRegion: ${{ AWS_REGION }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
 
   deploy-one:
     uses: ./.github/workflows/deploy-argocd.yml
@@ -61,10 +64,10 @@ jobs:
           - nest-js-github-actions-monorepo
     with:
       appName: ${{ matrix.appName }}
+      awsRegion: ${{ AWS_REGION }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
 
   deploy-all:
     uses: ./.github/workflows/deploy-argocd.yml

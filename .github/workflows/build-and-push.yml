@@ -6,12 +6,13 @@ on:
       appName:
         required: true
         type: string
+      awsRegion:
+        required: true
+        type: string
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
       AWS_SECRET_ACCESS_KEY:
-        required: true
-      AWS_REGION:
         required: true
     outputs:
       ecrRegistry:
@@ -41,7 +42,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ inputs.awsRegion }}
           mask-aws-account-id: false
 
       - name: Login to Amazon ECR
