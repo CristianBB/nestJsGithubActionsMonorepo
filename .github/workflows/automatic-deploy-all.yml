@@ -12,16 +12,19 @@ jobs:
   set-env:
     name: Set environment based on pushed branch
     runs-on: ubuntu-latest
+    outputs:
+      namespace: ${{ steps.set-namespace.outputs.namespace }}
     env:
       BRANCH: ${{env.GITHUB_REF_NAME}}
     steps:
       - name: Set namespace
+        id: set-namespace
         run: |
           echo "Branch: $BRANCH"
           if [ "$BRANCH" == "main" ]; then
-              echo "namespace=production" >> $GITHUB_ENV
+            echo "::set-output name=namespace::production"
           else
-              echo "namespace=beta" >> $GITHUB_ENV
+            echo "::set-output name=namespace::beta"
           fi
 
   # Get all apps from apps dir and return a json with app names
@@ -46,14 +49,14 @@ jobs:
   #       But as imageTag is based on SHA it's not a problem to generate all deploys
   deploy-all:
     uses: ./.github/workflows/deploy-argocd.yml
-    needs: [get-all-apps, build-all]
+    needs: [set-env, get-all-apps, build-all]
     strategy:
       matrix: ${{ fromJson(needs.get-all-apps.outputs.outputJson) }}
     with:
       appName: ${{ matrix.appName }}
+      namespace: ${{ needs.set-env.outputs.namespace }}
       ecrRegistry: ${{ needs.build-all.outputs.ecrRegistry }}
       imageTag: ${{ needs.build-all.outputs.imageTag }}
-      namespace: ${{ env.namespace }}
     secrets:
       ARGOCD_REPO: ${{ secrets.ARGOCD_REPO }}
       PAT_DEPLOY: ${{ secrets.PAT_DEPLOY }}
