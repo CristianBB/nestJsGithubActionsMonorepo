@@ -25,6 +25,7 @@ on:
           - beta
           - production
 jobs:
+  # Build specific app defined as input argument
   build-one:
     uses: ./.github/workflows/build-and-push.yml
     if: ${{ inputs.appName != 'ALL' }}
@@ -35,6 +36,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+  # Build specific app defined as input argument
   deploy-one:
     uses: ./.github/workflows/deploy-argocd.yml
     needs: build-one
@@ -47,10 +49,12 @@ jobs:
       ARGOCD_REPO: ${{ secrets.ARGOCD_REPO }}
       PAT_DEPLOY: ${{ secrets.PAT_DEPLOY }}
 
+  # Get all apps from apps dir and return a json with app names
   get-all-apps:
     uses: ./.github/workflows/get-all-apps.yml
     if: ${{ inputs.appName == 'ALL' }}
 
+  # Build apps with returned json from get-all-apps job
   build-all:
     uses: ./.github/workflows/build-and-push.yml
     needs: get-all-apps
@@ -63,20 +67,14 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+  # Deploy apps with returned json from get-all-apps job and data returned from build-all job (ecrRegistry, imageTag)
+  # Note: this job will receive only the LAST output from build-all job
+  #       But as imageTag is based on SHA it's not a problem to generate all deploys
   deploy-all:
-    # Note: this job will receive only the LAST output from previous matrix job (build-all)
-    # But as imageTag is based on SHA it's not a problem to generate all deploys
     uses: ./.github/workflows/deploy-argocd.yml
-    needs: build-all
+    needs: [get-all-apps, build-all]
     strategy:
-      matrix:
-        # Add new apps when are created
-        appName:
-          - app1
-          - app2
-          - app3
-          - app4
-          - nest-js-github-actions-monorepo
+      matrix: ${{ fromJson(needs.get-all-apps.outputs.outputJson) }}
     with:
       appName: ${{ matrix.appName }}
       ecrRegistry: ${{ needs.build-all.outputs.ecrRegistry }}
