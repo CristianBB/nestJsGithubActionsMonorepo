@@ -51,7 +51,7 @@ jobs:
 
   # Get all apps from apps dir and return a json with app names
   get-all-apps:
-    uses: ./.github/workflows/get-all-apps.yml
+    uses: ./.github/workflows/reusable/get-all-apps.yml
     if: ${{ inputs.appName == 'ALL' }}
 
   # Build apps with returned json from get-all-apps job
