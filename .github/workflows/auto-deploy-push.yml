@@ -38,7 +38,7 @@ jobs:
   # ALL APPS => Get all apps from apps dir and return a json with app names
   get-all-apps:
     needs: get-changed-apps
-    if: needs.get-changed-apps.outputs.allApps == true
+    if: needs.get-changed-apps.outputs.allApps == "true"
     uses: ./.github/workflows/get-all-apps.yml
 
   # ALL APPS => Build apps with returned json from get-all-apps job
@@ -74,7 +74,7 @@ jobs:
   # CHANGED APPS => Build apps with returned json from get-changed-apps job
   build-changed:
     uses: ./.github/workflows/build-and-push.yml
-    if: needs.get-changed-apps.outputs.allApps == false
+    if: needs.get-changed-apps.outputs.allApps == "false"
     needs: get-changed-apps
     strategy:
       matrix: ${{ fromJson(needs.get-changed-apps.outputs.appsChangedJson) }}
