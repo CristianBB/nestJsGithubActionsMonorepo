@@ -47,18 +47,15 @@ jobs:
       ARGOCD_REPO: ${{ secrets.ARGOCD_REPO }}
       PAT_DEPLOY: ${{ secrets.PAT_DEPLOY }}
 
+  get-all-apps:
+    uses: ./.github/workflows/get-all-apps.yml
+    if: ${{ inputs.appName == 'ALL' }}
+
   build-all:
     uses: ./.github/workflows/build-and-push.yml
-    if: ${{ inputs.appName == 'ALL' }}
+    needs: get-all-apps
     strategy:
-      matrix:
-        # Add new apps when are created
-        appName:
-          - app1
-          - app2
-          - app3
-          - app4
-          - nest-js-github-actions-monorepo
+      matrix: ${{ fromJson(needs.get-all-apps.outputs.outputJson) }}
     with:
       appName: ${{ matrix.appName }}
       awsRegion: eu-west-1
@@ -67,6 +64,8 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
   deploy-all:
+    # Note: this job will receive only the LAST output from previous matrix job (build-all)
+    # But as imageTag is based on SHA it's not a problem to generate all deploys
     uses: ./.github/workflows/deploy-argocd.yml
     needs: build-all
     strategy:

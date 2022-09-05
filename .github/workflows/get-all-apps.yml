@@ -1,0 +1,33 @@
+name: Get all apps
+
+on:
+  workflow_call:
+    outputs:
+      outputJson:
+        description: Output JSON with appNames extracted from directory
+        value: ${{ jobs.get-all-apps.outputs.outputJson }}
+
+jobs:
+  get-all-apps:
+    name: Get all apps from dir
+    runs-on: ubuntu-latest
+    outputs:
+      outputJson: ${{ steps.find.outputs.ecrRegistry }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Find app directories and return json with all app names
+        id: find
+        env:
+          APP_NAME: ${{ inputs.appName }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.appName }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd $GITHUB_WORKSPACE
+          outputJson=$(for app in $(find apps/* -type d -maxdepth 0 -exec basename {} \;); do
+            echo "$app"
+          done | jq -R -s 'split("\n") -[""]' | jq '{appName: .}')
+          echo "::set-output name=outputJson::$outputJson"
+
