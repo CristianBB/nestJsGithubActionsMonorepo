@@ -24,7 +24,7 @@ on:
 
 jobs:
   build-and-push:
-    name: Build & Deploy
+    name: Build & Push
     runs-on: ubuntu-latest
     outputs:
       ecrRegistry: ${{ steps.build.outputs.ecrRegistry }}
