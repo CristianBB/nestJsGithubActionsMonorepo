@@ -12,7 +12,7 @@ jobs:
     name: Get all apps from dir
     runs-on: ubuntu-latest
     outputs:
-      outputJson: ${{ steps.find.outputs.ecrRegistry }}
+      outputJson: ${{ steps.find.outputs.outputJson }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
