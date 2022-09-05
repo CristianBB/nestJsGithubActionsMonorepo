@@ -69,10 +69,19 @@ jobs:
   deploy-all:
     uses: ./.github/workflows/deploy-argocd.yml
     needs: build-all
+    strategy:
+      matrix:
+        # Add new apps when are created
+        appName:
+          - app1
+          - app2
+          - app3
+          - app4
+          - nest-js-github-actions-monorepo
     with:
-      appName: ${{ inputs.appName }}
-      ecrRegistry: ${{ needs.build-one.outputs.ecrRegistry }}
-      imageTag: ${{ needs.build-one.outputs.imageTag }}
+      appName: ${{ matrix.appName }}
+      ecrRegistry: ${{ needs.build-all.outputs.ecrRegistry }}
+      imageTag: ${{ needs.build-all.outputs.imageTag }}
       namespace: ${{ inputs.namespace }}
     secrets:
       ARGOCD_REPO: ${{ secrets.ARGOCD_REPO }}
