@@ -3,28 +3,63 @@ name: Test changed files
 on:
   push:
     branches:
-      - main
+      - 'main'
+      - 'develop'
+    paths:
+      - 'package.json'
+      - 'yarn.lock'
+      - 'apps/**'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest  # windows-latest | macos-latest
+  get-changed-apps:
+    runs-on: ubuntu-latest
     name: Test changed-files
+    outputs:
+      allApps: ${{ steps.all-apps-value.outputs.allApps }}
+      appsChangedJson: ${{ steps.changed-apps-value.outputs.appsChangedJson }}
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # OR "2" -> To retrieve the preceding commit.
+          fetch-depth: 0
 
-      - name: Get changed files
-        id: changed-files
+      # If package.json changed we need to deploy all apps
+      - name: Check changes on global dependencies
+        id: changed-global
         uses: tj-actions/changed-files@v29.0.3
         with:
           files: |
-            apps/*
+            package.json
+            yarn.lock
+
+      # Generate output for allApps
+      - name: Generate output for allApps
+        id: all-apps-value
+        env:
+          ALL_APPS: ${{ steps.changed-global.outputs.any_changed }}
+        run: |
+          if [$ALL_APPS == 'true']; then            
+            echo "::set-output name=allApps::'true'"
+          else
+            echo "::set-output name=allApps::'false'"
+          fi
+
+      # If no global changes, we need to detect and deploy only changed apps
+      - name: Get changed apps
+        id: changed-apps
+        uses: tj-actions/changed-files@v29.0.3
+        if: steps.changed-global.outputs.any_changed == 'false'
+        with:
+          files: |
+            apps/**
           dir_names: true
 
-      - name: List all changed files
+      # Generate output JSON for appsChangedJson
+      - name: Generate output JSON for appsChangedJson
+        id: changed-apps-value
+        if: steps.changed-global.outputs.any_changed == 'false'
         run: |
-          for path in ${{ steps.changed-files.outputs.all_changed_files }}; do
+          appsChangedJson = $(for path in ${{ steps.changed-files.outputs.all_changed_files }}; do
             app=$(echo "$path" | sed -e 's/apps\///g' | sed -e 's/\/.*//g')
             echo "$app"
-          done | jq -R -s 'split("\n") -[""]' | jq -c '{appName: [.|unique]}'
+          done | jq -R -s 'split("\n") -[""]' | jq -c '{appName: [.|unique]}')
+          echo "::set-output name=appsChangedJson::$appsChangedJson"
