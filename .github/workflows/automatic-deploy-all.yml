@@ -1,0 +1,60 @@
+name: Automatic Deploy ALL
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'develop'
+    paths:
+      - 'package.json'
+
+jobs:
+  set-env:
+    name: Set environment based on pushed branch
+    runs-on: ubuntu-latest
+    env:
+      BRANCH: ${{env.GITHUB_REF_NAME}}
+    steps:
+      - name: Set namespace
+        run: |
+          echo "Branch: $BRANCH"
+          if [ "$BRANCH" == "main" ]; then
+              echo "namespace=production" >> $GITHUB_ENV
+          else
+              echo "namespace=beta" >> $GITHUB_ENV
+          fi
+
+  # Get all apps from apps dir and return a json with app names
+  get-all-apps:
+    uses: ./.github/workflows/get-all-apps.yml
+
+  # Build apps with returned json from get-all-apps job
+  build-all:
+    uses: ./.github/workflows/build-and-push.yml
+    needs: get-all-apps
+    strategy:
+      matrix: ${{ fromJson(needs.get-all-apps.outputs.outputJson) }}
+    with:
+      appName: ${{ matrix.appName }}
+      awsRegion: eu-west-1
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  # Deploy apps with returned json from get-all-apps job and data returned from build-all job (ecrRegistry, imageTag)
+  # Note: this job will receive only the LAST output from build-all job
+  #       But as imageTag is based on SHA it's not a problem to generate all deploys
+  deploy-all:
+    uses: ./.github/workflows/deploy-argocd.yml
+    needs: [get-all-apps, build-all]
+    strategy:
+      matrix: ${{ fromJson(needs.get-all-apps.outputs.outputJson) }}
+    with:
+      appName: ${{ matrix.appName }}
+      ecrRegistry: ${{ needs.build-all.outputs.ecrRegistry }}
+      imageTag: ${{ needs.build-all.outputs.imageTag }}
+      namespace: ${{ env.namespace }}
+    secrets:
+      ARGOCD_REPO: ${{ secrets.ARGOCD_REPO }}
+      PAT_DEPLOY: ${{ secrets.PAT_DEPLOY }}
+
