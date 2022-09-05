@@ -1,19 +1,19 @@
-name: Test changed files
+name: Get changed apps
 
 on:
-  push:
-    branches:
-      - 'main'
-      - 'develop'
-    paths:
-      - 'package.json'
-      - 'yarn.lock'
-      - 'apps/**'
+  workflow_call:
+    outputs:
+      allApps:
+        description: Indicates if all apps needs to be deployed or not (true/false)
+        value: ${{ jobs.get-changed-apps.outputs.allApps }}
+      appsChangedJson:
+        description: Output JSON with appNames that needs to be deployed
+        value: ${{ jobs.get-changed-apps.outputs.appsChangedJson }}
 
 jobs:
   get-changed-apps:
     runs-on: ubuntu-latest
-    name: Test changed-files
+    name: get changed apps
     outputs:
       allApps: ${{ steps.all-apps-value.outputs.allApps }}
       appsChangedJson: ${{ steps.changed-apps-value.outputs.appsChangedJson }}

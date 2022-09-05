@@ -1,0 +1,103 @@
+name: Automatic Deploy by Push
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'develop'
+    paths:
+      - 'package.json'
+      - 'yarn.lock'
+      - 'apps/**'
+
+jobs:
+  set-env:
+    name: Set environment based on pushed branch
+    runs-on: ubuntu-latest
+    outputs:
+      namespace: ${{ steps.set-namespace.outputs.namespace }}
+    env:
+      BRANCH: ${{github.ref_name}}
+    steps:
+      - name: Set namespace
+        id: set-namespace
+        run: |
+          echo "Branch: $BRANCH"
+          if [ "$BRANCH" == "main" ]; then
+            echo "::set-output name=namespace::production"
+          else
+            echo "::set-output name=namespace::beta"
+          fi
+
+
+  # Get changed apps that needs to be deployed
+  get-changed-apps:
+    uses: ./.github/workflows/get-all-apps.yml
+
+  # ALL APPS => Get all apps from apps dir and return a json with app names
+  get-all-apps:
+    needs: get-changed-apps
+    if: needs.get-changed-apps.outputs.allApps == 'true'
+    uses: ./.github/workflows/get-all-apps.yml
+
+  # ALL APPS => Build apps with returned json from get-all-apps job
+  build-all:
+    uses: ./.github/workflows/build-and-push.yml
+    needs: [get-changed-apps, get-all-apps]
+    strategy:
+      matrix: ${{ fromJson(needs.get-all-apps.outputs.outputJson) }}
+    with:
+      appName: ${{ matrix.appName }}
+      awsRegion: eu-west-1
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  # ALL APPS => Deploy apps with returned json from get-all-apps job and data returned from build-all job (ecrRegistry, imageTag)
+  # Note: this job will receive only the LAST output from build-all job
+  #       But as imageTag is based on SHA it's not a problem to generate all deploys
+  deploy-all:
+    uses: ./.github/workflows/deploy-argocd.yml
+    needs: [set-env, get-changed-apps, get-all-apps, build-all]
+    strategy:
+      matrix: ${{ fromJson(needs.get-all-apps.outputs.outputJson) }}
+    with:
+      appName: ${{ matrix.appName }}
+      namespace: ${{ needs.set-env.outputs.namespace }}
+      ecrRegistry: ${{ needs.build-all.outputs.ecrRegistry }}
+      imageTag: ${{ needs.build-all.outputs.imageTag }}
+    secrets:
+      ARGOCD_REPO: ${{ secrets.ARGOCD_REPO }}
+      PAT_DEPLOY: ${{ secrets.PAT_DEPLOY }}
+
+  # CHANGED APPS => Build apps with returned json from get-changed-apps job
+  build-changed:
+    uses: ./.github/workflows/build-and-push.yml
+    if: needs.get-changed-apps.outputs.allApps == 'false'
+    needs: get-changed-apps
+    strategy:
+      matrix: ${{ fromJson(needs.get-changed-apps.outputs.appsChangedJson) }}
+    with:
+      appName: ${{ matrix.appName }}
+      awsRegion: eu-west-1
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  # CHANGED APPS => Deploy apps with returned json from get-changed-apps job and data returned from build-changed job (ecrRegistry, imageTag)
+  # Note: this job will receive only the LAST output from build-changed job
+  #       But as imageTag is based on SHA it's not a problem to generate all deploys
+  deploy-changed:
+    uses: ./.github/workflows/deploy-argocd.yml
+    needs: [set-env, get-changed-apps, build-changed]
+    strategy:
+      matrix: ${{ fromJson(needs.get-changed-apps.outputs.appsChangedJson) }}
+    with:
+      appName: ${{ matrix.appName }}
+      namespace: ${{ needs.set-env.outputs.namespace }}
+      ecrRegistry: ${{ needs.build-changed.outputs.ecrRegistry }}
+      imageTag: ${{ needs.build-changed.outputs.imageTag }}
+    secrets:
+      ARGOCD_REPO: ${{ secrets.ARGOCD_REPO }}
+      PAT_DEPLOY: ${{ secrets.PAT_DEPLOY }}
+
