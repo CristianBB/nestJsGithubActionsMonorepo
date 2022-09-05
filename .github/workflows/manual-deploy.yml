@@ -1,8 +1,5 @@
 name: Manual Deploy
 
-env:
-  AWS_REGION: eu-west-1
-
 on:
   workflow_dispatch:
     inputs:
@@ -33,7 +30,7 @@ jobs:
     if: ${{ inputs.appName != 'ALL' }}
     with:
       appName: ${{ inputs.appName }}
-      awsRegion: ${{ env.AWS_REGION }}
+      awsRegion: eu-west-1
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -64,7 +61,7 @@ jobs:
           - nest-js-github-actions-monorepo
     with:
       appName: ${{ matrix.appName }}
-      awsRegion: ${{ env.AWS_REGION }}
+      awsRegion: eu-west-1
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
