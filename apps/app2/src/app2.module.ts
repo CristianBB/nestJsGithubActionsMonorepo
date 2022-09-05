@@ -3,7 +3,7 @@ import { App2Controller } from './app2.controller';
 import { App2Service } from './app2.service';
 
 @Module({
-  imports: [],
+  imports: [ ],
   controllers: [App2Controller],
   providers: [App2Service],
 })

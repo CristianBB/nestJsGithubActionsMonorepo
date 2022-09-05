@@ -25,5 +25,6 @@ jobs:
       - name: List all changed files
         run: |
           for path in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            echo "$path was changed"
+            app=$(echo "$path" | sed -e 's/apps\///g' | sed -e 's/\/.*//g')
+            echo "$path was changed => $app"
           done
