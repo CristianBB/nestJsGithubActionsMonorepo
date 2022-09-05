@@ -33,7 +33,7 @@ jobs:
 
   # Get changed apps that needs to be deployed
   get-changed-apps:
-    uses: ./.github/workflows/get-all-apps.yml
+    uses: ./.github/workflows/get-changed-apps.yml
 
   # ALL APPS => Get all apps from apps dir and return a json with app names
   get-all-apps:
