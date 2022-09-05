@@ -1,10 +1,10 @@
 name: Manual Deploy
 
+env:
+  AWS_REGION: eu-west-1
+
 on:
   workflow_dispatch:
-    env:
-      AWS_REGION: eu-west-1
-
     inputs:
       appName:
         description: App to deploy
