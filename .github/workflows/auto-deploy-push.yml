@@ -23,11 +23,12 @@ jobs:
         id: set-namespace
         run: |
           echo "Branch: $BRANCH"
+          namespace=beta
           if [ "$BRANCH" == "main" ]; then
-            echo "::set-output name=namespace::production"
-          else
-            echo "::set-output name=namespace::beta"
+            namespace=production
           fi
+          echo "namespace: $namespace"
+          echo "::set-output name=namespace::$namespace"
 
 
   # Get changed apps that needs to be deployed
