@@ -39,10 +39,8 @@ jobs:
         run: |
           echo $ALL_APPS
           if $ALL_APPS == 'true'; then    
-            echo "trueeee"       
             echo "::set-output name=allApps::'true'"
           else   
-            echo "falseee"      
             echo "::set-output name=allApps::'false'"
           fi
 
