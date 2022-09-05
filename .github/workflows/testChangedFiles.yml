@@ -37,6 +37,7 @@ jobs:
         env:
           ALL_APPS: ${{ steps.changed-global.outputs.any_changed }}
         run: |
+          echo $ALL_APPS
           if [[$ALL_APPS == 'true']]; then            
             echo "::set-output name=allApps::'true'"
           else
