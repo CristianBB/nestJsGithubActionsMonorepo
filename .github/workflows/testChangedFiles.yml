@@ -26,5 +26,5 @@ jobs:
         run: |
           for path in ${{ steps.changed-files.outputs.all_changed_files }}; do
             app=$(echo "$path" | sed -e 's/apps\///g' | sed -e 's/\/.*//g')
-            echo "$path was changed => $app"
-          done
+            echo "$app"
+          done | jq -R -s 'split("\n") -[""]' | jq -c '{appName: [.|unique]}'
