@@ -10,12 +10,16 @@ on:
       - 'yarn.lock'
       - 'apps/**'
 
+env:
+  AWS_REGION: eu-west-1
+
 jobs:
   set-env:
-    name: Set environment based on pushed branch
+    name: Set Environment
     runs-on: ubuntu-latest
     outputs:
       namespace: ${{ steps.set-namespace.outputs.namespace }}
+      awsRegion: ${{ steps.set-env.outputs.awsRegion }}
     env:
       BRANCH: ${{github.ref_name}}
     steps:
@@ -28,8 +32,9 @@ jobs:
             namespace=production
           fi
           echo "namespace: $namespace"
+          echo "AWS_REGION: $AWS_REGION"
           echo "::set-output name=namespace::$namespace"
-
+          echo "::set-output name=awsRegion::$AWS_REGION"
 
   # Get changed apps that needs to be deployed
   get-changed-apps:
@@ -44,12 +49,12 @@ jobs:
   # ALL APPS => Build apps with returned json from get-all-apps job
   build-all:
     uses: ./.github/workflows/build-and-push.yml
-    needs: get-all-apps
+    needs: [set-env, get-all-apps]
     strategy:
       matrix: ${{ fromJson(needs.get-all-apps.outputs.outputJson) }}
     with:
       appName: ${{ matrix.appName }}
-      awsRegion: eu-west-1
+      awsRegion: ${{ needs.set-env.outputs.awsRegion }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -73,14 +78,14 @@ jobs:
 
   # CHANGED APPS => Build apps with returned json from get-changed-apps job
   build-changed:
-    needs: get-changed-apps
+    needs: [set-env, get-changed-apps]
     if: needs.get-changed-apps.outputs.allApps == 'false'
     uses: ./.github/workflows/build-and-push.yml
     strategy:
       matrix: ${{ fromJson(needs.get-changed-apps.outputs.appsChangedJson) }}
     with:
       appName: ${{ matrix.appName }}
-      awsRegion: eu-west-1
+      awsRegion: ${{ needs.set-env.outputs.awsRegion }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
