@@ -18,13 +18,13 @@ jobs:
     name: Set Environment
     runs-on: ubuntu-latest
     outputs:
-      namespace: ${{ steps.set-namespace.outputs.namespace }}
+      namespace: ${{ steps.set-env.outputs.namespace }}
       awsRegion: ${{ steps.set-env.outputs.awsRegion }}
     env:
       BRANCH: ${{github.ref_name}}
     steps:
-      - name: Set namespace
-        id: set-namespace
+      - name: Set needed env vars
+        id: set-env
         run: |
           echo "Branch: $BRANCH"
           namespace=beta
