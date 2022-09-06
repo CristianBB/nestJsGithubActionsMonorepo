@@ -29,13 +29,27 @@ env:
   AWS_REGION: eu-west-1
 
 jobs:
+  # Set environment
+  set-env:
+    runs-on: ubuntu-latest
+    name: Set Environment
+    outputs:
+      awsRegion: ${{ steps.set-env.outputs.awsRegion }}
+    steps:
+      - name: Set needed env vars
+        id: set-env
+        run: |
+          echo "AWS_REGION: $AWS_REGION"
+          echo "::set-output name=awsRegion::$AWS_REGION"
+
   # Build specific app defined as input argument
   build-one:
     uses: ./.github/workflows/build-and-push.yml
+    needs: set-env
     if: ${{ inputs.appName != 'ALL' }}
     with:
       appName: ${{ inputs.appName }}
-      awsRegion: ${{ env.AWS_REGION }}
+      awsRegion: ${{ needs.set-env.outputs.awsRegion }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -61,12 +75,12 @@ jobs:
   # Build apps with returned json from get-all-apps job
   build-all:
     uses: ./.github/workflows/build-and-push.yml
-    needs: get-all-apps
+    needs: [set-env, get-all-apps]
     strategy:
       matrix: ${{ fromJson(needs.get-all-apps.outputs.outputJson) }}
     with:
       appName: ${{ matrix.appName }}
-      awsRegion: ${{ env.AWS_REGION }}
+      awsRegion: ${{ needs.set-env.outputs.awsRegion }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
